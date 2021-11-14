@@ -21,78 +21,50 @@ namespace MyCoreGuestBook.Controllers
     [HttpGet]
     public IActionResult Index()
     {
-      IList<GuestBook> items = new List<GuestBook>();
+      /* using EF Core */
+      GuestBookDataContext db = new GuestBookDataContext();
+      var items = db.GuestBooks.ToList();
 
-      // database connection
-      MySqlConnection conn = new MySqlConnection
-      {
-        ConnectionString = Startup.ConnectionString
-        // ConnectionString = "server=127.0.0.1;port=3306;userid=root;pwd=12345;database=elibrary;sslmode=none"
-      };
-      conn.Open();
+      // IList<GuestBook> items = new List<GuestBook>();
 
-      // prepare query
-      MySqlCommand cmd = new MySqlCommand("SELECT * FROM guestbooks;", conn);
+      // // database connection
+      // MySqlConnection conn = new MySqlConnection
+      // {
+      //   ConnectionString = Startup.ConnectionString
+      //   // ConnectionString = "server=127.0.0.1;port=3306;userid=root;pwd=12345;database=elibrary;sslmode=none"
+      // };
+      // conn.Open();
 
-      // read data
-      MySqlDataReader dataReader = cmd.ExecuteReader();
-      while (dataReader.Read())
-      {
-        // save record to model object
-        GuestBook item = new GuestBook();
-        item.Email = Convert.ToString(dataReader["guest_email"]);
-        item.Name = Convert.ToString(dataReader["guest_name"]);
-        item.Message = Convert.ToString(dataReader["message"]);
+      // // prepare query
+      // MySqlCommand cmd = new MySqlCommand("SELECT * FROM guestbooks;", conn);
 
-        // save model object to collection
-        items.Add(item);
-      }
-      // close reader
-      dataReader.Close();
-      conn.Close();
+      // // read data
+      // MySqlDataReader dataReader = cmd.ExecuteReader();
+      // while (dataReader.Read())
+      // {
+      //   // save record to model object
+      //   GuestBook item = new GuestBook();
+      //   item.Email = Convert.ToString(dataReader["guest_email"]);
+      //   item.Name = Convert.ToString(dataReader["guest_name"]);
+      //   item.Message = Convert.ToString(dataReader["message"]);
+
+      //   // save model object to collection
+      //   items.Add(item);
+      // }
+      // // close reader
+      // dataReader.Close();
+      // conn.Close();
 
       return View(items);
     }
 
-    [HttpGet]
-    public IActionResult Create()
-    {
-      return View();
-    }
+    // [HttpPost]
+    // public IActionResult Index(GuestBook data)
+    // {
+    //   ViewBag.GuestBookMessage = "Hello " + data.Name + "(" + data.Email + ") menulis " + data.Message;
 
-    [HttpPost]
-    public IActionResult Create(GuestBook item)
-    {
-      if (ModelState.IsValid)
-      {
-        MySqlConnection conn = new MySqlConnection
-        {
-          ConnectionString = Startup.ConnectionString
-        };
-        conn.Open();
-
-        MySqlCommand command = conn.CreateCommand();
-        command.CommandText = "INSERT INTO guestbooks (guest_name, guest_email, message) VALUES (?name, ?email, ?message)";
-
-        command.Parameters.AddWithValue("?name", item.Name);
-        command.Parameters.AddWithValue("?email", item.Email);
-        command.Parameters.AddWithValue("?message", item.Message);
-        command.ExecuteNonQuery();
-
-        conn.Close();
-
-        return RedirectToAction("Index");
-      }
-      return View();
-    }
-
-    [HttpPost]
-    public IActionResult Index(GuestBook data)
-    {
-      ViewBag.GuestBookMessage = "Hello " + data.Name + "(" + data.Email + ") menulis " + data.Message;
-
-      return View();
-    }
+    //   return View();
+    // }
 
     [HttpGet]
     public IActionResult Privacy()
@@ -105,5 +77,44 @@ namespace MyCoreGuestBook.Controllers
     {
       return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+
+    [HttpGet]
+    public IActionResult Create()
+    {
+      return View();
+    }
+
+    [HttpPost]
+    public IActionResult Create(GuestBook item)
+    {
+      if (ModelState.IsValid)
+      {
+        /* using EF Core */
+        GuestBookDataContext db = new GuestBookDataContext();
+        db.Add(item);
+        db.SaveChanges();
+
+        // MySqlConnection conn = new MySqlConnection
+        // {
+        //   ConnectionString = Startup.ConnectionString
+        // };
+        // conn.Open();
+
+        // MySqlCommand command = conn.CreateCommand();
+        // command.CommandText = "INSERT INTO guestbooks (guest_name, guest_email, message) VALUES (?name, ?email, ?message)";
+
+        // command.Parameters.AddWithValue("?name", item.Name);
+        // command.Parameters.AddWithValue("?email", item.Email);
+        // command.Parameters.AddWithValue("?message", item.Message);
+        // command.ExecuteNonQuery();
+
+        // conn.Close();
+
+        // return RedirectToAction("Index");
+      }
+      return View();
+    }
+
   }
 }

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using MyCoreGuestBook.Models;
 
 namespace MyCoreGuestBook
 {
@@ -38,6 +39,7 @@ namespace MyCoreGuestBook
     {
       services.AddMvc();
       services.AddControllersWithViews();
+      GuestBookDataContext.ConnectionString = Configuration.GetConnectionString("Default");
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
